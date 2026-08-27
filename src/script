@@ -1,0 +1,12 @@
+create table customers
+(
+    id             int          not null
+        primary key,
+    name           varchar(100) null,
+    address        varchar(50)  null,
+    contact_number int          null,
+    account_number bigint       null,
+    account_type   varchar(50)  null
+);
+
+
