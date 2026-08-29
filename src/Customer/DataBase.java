@@ -15,9 +15,9 @@ public class DataBase {
         String password = System.getenv("DB_PASSWORD");
         List<Customer> customerList = new ArrayList<>();
 
-        String query = "SELECT * FROM bank.customers";
+        String query = "SELECT * FROM Bank.customer_accounts";
 
-        System.out.println("Fetching data from MySQL...");
+        System.out.println("Fetching data from Server");
 
         try {
             // 1. Force register driver class
@@ -52,5 +52,53 @@ public class DataBase {
         }
         return customerList.toArray(new Customer[0]);
     }
+
+    public static int updateContactInDatabase(long Id, long contactNumber) {
+        String url = "jdbc:mysql://localhost:3306/Bank";
+        String user = System.getenv("DB_USER");
+        String password = System.getenv("DB_PASSWORD");
+
+        // The SQL query to permanently update the primary key ID
+        String updateQuery = "UPDATE bank.customer_accounts SET contact_number = ? WHERE id = ?;";
+
+        try (Connection connection = DriverManager.getConnection(url, user, password);
+             PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+
+            // Set the placeholders (?)
+            preparedStatement.setLong(1, contactNumber); // First ? is the new ID
+            preparedStatement.setLong(2, Id); // Second ? is the old ID
+
+            // executeUpdate() returns the number of rows affected (should be 1)
+            return preparedStatement.executeUpdate();
+
+        } catch (Exception e) {
+            System.err.println("Database update failed: " + e.getMessage());
+            return 0; // Return 0 if the database update failed
+        }
+    }
+
+    public static int deleteAccountInDatabase(long accountNumber) {
+        String url = "jdbc:mysql://localhost:3306/Bank";
+        String user = System.getenv("DB_USER");
+        String password = System.getenv("DB_PASSWORD");
+
+        // The SQL query to permanently update the primary key ID
+        String updateQuery = " Delete from Bank.customer_accounts WHERE account_number = ?;";
+
+        try (Connection connection = DriverManager.getConnection(url, user, password);
+             PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+
+            // Set the placeholders (?)
+            preparedStatement.setLong(1, accountNumber); // First ? is the new ID
+
+            // executeUpdate() returns the number of rows affected (should be 1)
+            return preparedStatement.executeUpdate();
+
+        } catch (Exception e) {
+            System.err.println("Database DELETION failed: " + e.getMessage());
+            return 0; // Return 0 if the database update failed
+        }
+    }
+
 
 }

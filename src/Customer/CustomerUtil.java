@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.util.*;
 
 public class CustomerUtil {
+    Scanner sc=new Scanner(System.in);
 
     public static boolean checkCustomerExistence(Customer[] c, String Name) {
         boolean existence = false;
@@ -37,46 +38,6 @@ public class CustomerUtil {
         return count;
     }
 
-    public static int updateContactInDatabase(long Id, long contactNumber) {
-        String url = "jdbc:mysql://localhost:3306/Bank";
-        String user = System.getenv("DB_USER");
-        String password = System.getenv("DB_PASSWORD");
-
-        // The SQL query to permanently update the primary key ID
-        String updateQuery = "UPDATE bank.customers SET contact_number = ? WHERE id = ?;";
-
-        try (Connection connection = DriverManager.getConnection(url, user, password);
-             PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
-
-            // Set the placeholders (?)
-            preparedStatement.setLong(1, contactNumber); // First ? is the new ID
-            preparedStatement.setLong(2, Id); // Second ? is the old ID
-
-            // executeUpdate() returns the number of rows affected (should be 1)
-            return preparedStatement.executeUpdate();
-
-        } catch (Exception e) {
-            System.err.println("Database update failed: " + e.getMessage());
-            return 0; // Return 0 if the database update failed
-        }
-    }
-
-    public static boolean validateId(Customer[] c, long id, String name) {
-        long[][] account = CustomerUtil.getAccountNo(c, name);
-        if (account != null) {
-            for (int i = 0; i < account[0].length; i++) {
-                if (id == account[0][i]) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public static boolean validateContactNumber(long inputContactNumber) {
-        return inputContactNumber > 999999999 && 10000000000L > inputContactNumber;
-    }
-
     public static long[][] getAccountNo(Customer[] c, String Name) {
         int count = getNoOFAccounts(c, Name);
         if (count == 0) {
@@ -104,15 +65,15 @@ public class CustomerUtil {
         System.out.println("Enter ID to update contact Number: ");
         while (true) {
             long Id = Long.parseLong(sc.nextLine());
-            boolean IdValidation = CustomerUtil.validateId(c, Id, name);
+            boolean IdValidation = FunctionUtil.validateId(c, Id, name);
 
             if (IdValidation) {
                 System.out.println("Enter contact number to be updated: ");
                 while (true) {
                     long contactNumber = Long.parseLong(sc.nextLine());
-                    boolean contactValidation = CustomerUtil.validateContactNumber(contactNumber);
+                    boolean contactValidation =FunctionUtil.validateContactNumber(contactNumber);
                     if (contactValidation) {
-                        long status = CustomerUtil.updateContactInDatabase(Id, contactNumber);
+                        long status = DataBase.updateContactInDatabase(Id, contactNumber);
                         if (status != 0) {
                             System.out.println("Contact Number is been SuccessFully Updated");
                         }
@@ -128,5 +89,38 @@ public class CustomerUtil {
         }
     }
 
+    public static void deleteAccountFunction(Customer[] c,String name) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter AccountNo. to be deleted: ");
+        long accountNumber;
+        while (true) {
+            try {
+                 accountNumber = Long.parseLong(sc.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.print("Invalid format. Please enter numbers only:");
+                continue; // Jumps directly back to the top of the loop
+            }
+            boolean accountValidation = FunctionUtil.validateAccountNo(c, accountNumber, name);
+            if (accountValidation) {
+                System.out.print(" Confirm you want to delete Account No:");
+                String userInput = sc.nextLine();
+                if (userInput.equalsIgnoreCase("yes")) {
+                        long status = DataBase.deleteAccountInDatabase(accountNumber);
+                        if (status != 0) {
+                            System.out.println("account is been SuccessFully deleted");
+                        } else{
+                            System.out.println("Account deletion failed");
+                        }
+                        break;
+                } else{
+                    System.out.println("Deletion cancelled by the user.");
+                    break;
+                  }
+                }else{
+                System.out.print("Invalid Account number or unauthorized access. Please try again:");
+                }
+            }
+        }
 
 }
+

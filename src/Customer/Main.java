@@ -7,22 +7,22 @@ public class Main {
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
+        boolean isFirstRun = true;
+        while (true) {
         Customer[] customer = DataBase.loadCustomerSFromDatabase();
         if(customer.length==0) {
             System.out.println("No data available.exiting program");
             return;
         }
 
-        boolean isFirstRun = true;
-        while (true) {
+
             if (!isFirstRun && FunctionUtil.shouldExit(sc)){
                 IO.println("Thank you for using our services! Goodbye!");
                 break;
             }
             isFirstRun=false;
-
             // Now you can safely use your 'customer' array or 'customerList' down below!
-            System.out.println("Enter Name of the AccountHolder: ");
+            System.out.print("Enter Name of the AccountHolder: ");
             String name = sc.nextLine();
 
             System.out.println("Customer " + name + " has account in the bank: " + CustomerUtil.checkCustomerExistence(customer, name));
@@ -52,8 +52,10 @@ public class Main {
                         int choice = Integer.parseInt(sc.nextLine());
                         switch (choice) {
                             case 1:
-                                CustomerUtil.updateContactFunction(customer,name);
+                                CustomerUtil.updateContactFunction(customer, name);
                                 break;
+                            case 5:
+                                CustomerUtil.deleteAccountFunction(customer,name);
                             case 6:
                                 running = false;
                                 break;
@@ -64,6 +66,7 @@ public class Main {
                 }
                 catch(NumberFormatException e){
                     System.out.println("Error!=Due to wrong input data type");
+                    continue;
                 }
             }
         }
